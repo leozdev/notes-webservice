@@ -33,3 +33,5 @@ A aplicação permite aos usuários:
 - `index.html`: Página principal do aplicativo.
 - `css/`: Estilos utilizados na aplicação.
 - `js/`: Código JavaScript para manipulação de dados e comunicação com o webservice.
+
+---
