@@ -1,5 +1,5 @@
 body{
-    background: #edf1f5;
+    background: #ffffff;
     margin-top:20px;
 }
 
@@ -45,6 +45,10 @@ body{
     padding: 1.57rem;
 }
 
+.side-stick {
+    display: inline-block !important;
+}
+
  .note-has-grid .nav-link {
      padding: .5rem
  }
@@ -52,6 +56,14 @@ body{
  .note-has-grid .single-note-item .card {
      border-radius: 10px
  }
+
+ .note-has-grid .single-note-item .side-stick {
+    position: absolute;
+    width: 3px;
+    height: 35px;
+    left: 0;
+    background-color: #007bff;
+}
 
  .note-has-grid .single-note-item.all-category .more-options,
  .note-has-grid .single-note-item.all-category.note-favourite .more-options {

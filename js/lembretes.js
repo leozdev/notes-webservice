@@ -13,7 +13,7 @@ $(document).ready(function() {
     function verificarValidadeToken(token) {
         setInterval(function() {
             $.ajax({
-                url: 'https://ifsp.ddns.net/webservices/usuario/check',
+                url: 'https://ifsp.ddns.net/webservices/lembretes/usuario/check',
                 type: 'GET',
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -29,7 +29,7 @@ $(document).ready(function() {
     }
 
     function tratarTokenInvalido() {
-        alert('Token expirado ou inválido. Redirecionando para o login.');
+        alert('Sua sessão expirou ou está inválida. Você será redirecionado para o login.');
         localStorage.removeItem('authToken');
         window.location.href = 'login.html';
     }
@@ -54,7 +54,7 @@ $(document).ready(function() {
     function renovarToken() {
         const token = localStorage.getItem('authToken');
         $.ajax({
-            url: 'https://ifsp.ddns.net/webservices/usuario/renew',
+            url: 'https://ifsp.ddns.net/webservices/lembretes/usuario/renew',
             type: 'GET',
             headers: {
                 'Authorization': 'Bearer ' + token
@@ -62,11 +62,11 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.token) {
                     localStorage.setItem('authToken', response.token);
-                    alert("Token renovado com sucesso!");
+                    alert("Sessão renovada com sucesso!");
                 }
             },
             error: function() {
-                alert('Erro ao renovar o token. Redirecionando para o login.');
+                alert('Erro ao tentar manter sua sessão ativa. Você será redirecionado para o login.');
                 window.location.href = 'login.html';
             }
         });
@@ -93,16 +93,23 @@ $(document).ready(function() {
         });
     }
 
+    // Botão de editar é o edit-note
+    // Botão de excluir é o remove-note
     function criarHtmlNota(note) {
         return `
             <div class="col-md-4 single-note-item all-category">
                 <div class="card card-body">
-                    <p class="note-date font-12 text-muted">${note.data}</p>
+                    <span class="side-stick"></span>
+                    <div class="d-flex align-items-center mb-3"">
+                        <i class="fa fa-calendar-o mr-2"></i>
+                        <h6 class="note-date font-12 text-muted mb-0">${note.data}</h6>
+                    </div>
                     <div class="note-content">
                         <p class="note-inner-content text-muted" data-noteContent="${note.texto}">${note.texto}</p>
                     </div>
                     <div class="d-flex align-items-center">
                         <span class="mr-1"><i class="fa fa-trash remove-note"></i></span>
+                        <span class="ml-auto mr-1"><i class="fa fa-pencil-square-o edit-note"></i></span> 
                     </div>
                 </div>
             </div>
@@ -119,8 +126,6 @@ $(document).ready(function() {
     // Adicionar nova nota
     $('#add-notes').on('click', function() {
         $('#addnotesmodal').modal('show');
-        $('#btn-n-save').hide();
-        $('#btn-n-add').show();
     });
 
     $("#btn-n-add").on('click', function(event) {
@@ -128,8 +133,8 @@ $(document).ready(function() {
 
         const descricaoNota = $('#note-has-description').val();
 
-        if (descricaoNota.length > 255) {
-            alert("A descrição deve ter no máximo 255 caracteres.");
+        if (descricaoNota.length === 0 || descricaoNota.length > 255) {
+            alert("O conteúdo deve ter entre 1 e 255 caracteres.");
             return;
         }
 
@@ -176,10 +181,9 @@ $(document).ready(function() {
             },
             success: function() {
                 localStorage.removeItem('authToken');
-                window.location.href = 'login.html';
             },
-            error: function() {
-                alert("Erro ao fazer logout. Tente novamente.");
+            complete: function() {
+                window.location.href = 'login.html';
             }
         });
     });
