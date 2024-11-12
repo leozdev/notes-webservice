@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <title>Painel de Lembretes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css\stylesheet.css" rel="stylesheet">
+    <link rel="icon" href="assets/favicon.png" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <header class="container d-flex justify-content-md-between py-4 mb-4 border-bottom">
+        <img src="assets/logo.png" alt="Logo" height="40">
+
+        <div class="text-end">
+        <button id="logoutButton" type="button" class="btn btn-outline-primary me-2">Sair</button>
+        </div>
+    </header>
+
+    <section class="container">
+        <ul class="nav nav-pills p-3 bg-white mb-3 rounded-pill align-items-center">
+            <h5 class="d-none d-md-block">Todos os Lembretes:</h5>
+            <li class="nav-item ml-auto">
+                <a href="javascript:void(0)" class="nav-link btn-primary rounded-pill d-flex align-items-center px-3" id="add-notes">
+                    <span class="d-none d-md-block font-14">Novo Lembrete</span>
+                </a>
+            </li>
+        </ul>
+    </section>
+
+    <div class="page-content container note-has-grid">
+        <div class="tab-content bg-transparent">
+            <div id="note-full-container" class="note-has-grid row">
+                <!-- Os lembretes serão carregadas aqui via AJAX -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar um lembrete -->
+    <div class="modal fade" id="addnotesmodal" tabindex="-1" role="dialog" aria-labelledby="addnotesmodalTitle" style="display: none;" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content custom-rounded"> <!-- Adiciona a classe custom-rounded aqui -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title text-white">Criar Lembrete</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="notes-box">
+                        <div class="notes-content">
+                            <form action="javascript:void(0);" id="addnotesmodalTitle">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="note-description">
+                                            <label for="note-has-description">Conteúdo do Lembrete</label>
+                                            <textarea id="note-has-description" class="form-control" minlength="60" placeholder="Insira o conteúdo do lembrete" rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btn-n-save" class="float-left btn btn-success" style="display: none;">Salvar</button>
+                    <button class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                    <button id="btn-n-add" class="btn btn-success" disabled="disabled">Criar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal para perguntar se o usuário deseja continuar conectado -->
+    <div id="renewTokenModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">Você deseja continuar conectado?</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+            <p>Seu token está prestes a expirar. Deseja continuar conectado?</p>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="continueConnectedYes">Sim</button>
+            <button type="button" class="btn btn-secondary" id="continueConnectedNo">Não</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="container fixed-bottom">
+        <footer class="py-3 my-4 border-top">
+            <p class="text-center text-body-secondary">
+                Desenvolvido por <strong>Leo Freitas</strong>, <strong>Vinícius Rafael</strong> e <strong>Mariana Montilha</strong> utilizando 
+                <a href="https://getbootstrap.com/" target="_blank"><strong>Bootstrap</strong></a>.
+            </p>
+        </footer>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js\lembretes.js"></script>
+</body>
+</html>
