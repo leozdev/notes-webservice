@@ -3,7 +3,7 @@ $(document).ready(function() {
 
     // Verifica se o usuário está autenticado
     if (token) {
-        carregarNotas();
+        carregarLembretes();
         verificarValidadeToken(token);
     } else {
         window.location.href = 'login.html';
@@ -25,7 +25,7 @@ $(document).ready(function() {
                     tratarTokenInvalido();
                 }
             });
-        }, 180000); // Verifica a validade a cada 3 minutos
+        }, 180000);
     }
 
     function tratarTokenInvalido() {
@@ -72,8 +72,8 @@ $(document).ready(function() {
         });
     }
 
-    // Funções para trabalhar com as notas
-    function carregarNotas() {
+    // Funções para trabalhar com os lembretes
+    function carregarLembretes() {  
         $.ajax({
             url: 'https://ifsp.ddns.net/webservices/lembretes/lembrete',
             type: 'GET',
@@ -81,34 +81,34 @@ $(document).ready(function() {
                 'Authorization': 'Bearer ' + token
             },
             success: function(response) {
-                response.forEach(function(note) {
-                    const notaHtml = criarHtmlNota(note);
-                    $("#note-full-container").prepend(notaHtml);
+                response.forEach(function(lembrete) {  
+                    const lembreteHtml = criarHtmlLembrete(lembrete);  
+                    $("#note-full-container").prepend(lembreteHtml);  
                 });
-                removerNota();
+                removerLembrete();  
             },
             error: function() {
-                alert('Erro ao carregar as notas. Tente novamente.');
+                alert('Erro ao carregar os lembretes. Tente novamente.');  
             }
         });
     }
 
-    // Botão de editar é o edit-note
-    // Botão de excluir é o remove-note
-    function criarHtmlNota(note) {
+    // Botão de editar é o edit-lembrete
+    // Botão de excluir é o remove-lembrete
+    function criarHtmlLembrete(lembrete) {  
         return `
             <div class="col-md-4 single-note-item all-category">
                 <div class="card card-body">
                     <span class="side-stick"></span>
-                    <div class="d-flex align-items-center mb-3"">
+                    <div class="d-flex align-items-center mb-3">
                         <i class="fa fa-calendar-o mr-2"></i>
-                        <h6 class="note-date font-12 text-muted mb-0">${note.data}</h6>
+                        <h6 class="note-date font-12 text-muted mb-0">${lembrete.data}</h6>  <!-- Alterado para "lembrete" -->
                     </div>
                     <div class="note-content">
-                        <p class="note-inner-content text-muted" data-noteContent="${note.texto}">${note.texto}</p>
+                        <p class="note-inner-content text-muted" data-noteContent="${lembrete.texto}">${lembrete.texto}</p>  <!-- Alterado para "lembrete" -->
                     </div>
                     <div class="d-flex align-items-center">
-                        <span class="mr-1"><i class="fa fa-trash remove-note"></i></span>
+                        <span class="mr-1"><i class="fa fa-trash remove-note"></i></span> <!-- Alterado para "lembrete" -->
                         <span class="ml-auto mr-1"><i class="fa fa-pencil-square-o edit-note"></i></span> 
                     </div>
                 </div>
@@ -116,14 +116,14 @@ $(document).ready(function() {
         `;
     }
 
-    function removerNota() {
-        $(".remove-note").off('click').on('click', function(event) {
+    function removerLembrete() {  
+        $(".remove-note").off('click').on('click', function(event) {  
             event.stopPropagation();
             $(this).parents('.single-note-item').remove();
         });
     }
 
-    // Adicionar nova nota
+    // Adicionar novo lembrete
     $('#add-notes').on('click', function() {
         $('#addnotesmodal').modal('show');
     });
@@ -131,41 +131,41 @@ $(document).ready(function() {
     $("#btn-n-add").on('click', function(event) {
         event.preventDefault();
 
-        const descricaoNota = $('#note-has-description').val();
+        const descricaoLembrete = $('#note-has-description').val();  
 
-        if (descricaoNota.length === 0 || descricaoNota.length > 255) {
+        if (descricaoLembrete.length === 0 || descricaoLembrete.length > 255) {  
             alert("O conteúdo deve ter entre 1 e 255 caracteres.");
             return;
         }
 
-        const novaNota = {
-            texto: descricaoNota,
+        const novoLembrete = {  
+            texto: descricaoLembrete,  
             data: new Date().toISOString().slice(0, 19).replace('T', ' ')
         };
 
-        adicionarNovaNota(novaNota);
+        adicionarNovoLembrete(novoLembrete);  
     });
 
-    function adicionarNovaNota(novaNota) {
+    function adicionarNovoLembrete(novoLembrete) {  
         const token = localStorage.getItem('authToken');
         $.ajax({
-            url: 'https://ifsp.ddns.net/webservices/lembretes/lembrete',
+            url: 'https://ifsp.ddns.net/webservices/lembretes/lembrete',  
             type: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + token,
                 'Content-Type': 'application/json'
             },
-            data: JSON.stringify(novaNota),
+            data: JSON.stringify(novoLembrete),  
             success: function() {
-                const novaNotaHtml = criarHtmlNota(novaNota);
-                $("#note-full-container").prepend(novaNotaHtml);
-                $('#note-has-description').val('');
+                const novoLembreteHtml = criarHtmlLembrete(novoLembrete);  
+                $("#note-full-container").prepend(novoLembreteHtml);  
+                $('#note-has-description').val('');  
                 $('#addnotesmodal').modal('hide');
-                removerNota();
-                alert("Nota adicionada com sucesso!");
+                removerLembrete();  
+                alert("Lembrete adicionado com sucesso!");  
             },
             error: function() {
-                alert("Erro ao adicionar a nota. Tente novamente.");
+                alert("Erro ao adicionar o lembrete. Tente novamente.");  
             }
         });
     }

@@ -17,6 +17,7 @@ $(document).ready(function() {
             data: JSON.stringify(data),
             success: function() {
                 alert("Cadastro realizado com sucesso!");
+                window.location.href = 'login.html';
             },
             error: function() {
                 alert("Erro ao cadastrar. Verifique os dados e tente novamente.");
