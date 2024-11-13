@@ -15,9 +15,10 @@ $(document).ready(function() {
             method: "POST",
             contentType: "application/json",
             data: JSON.stringify(data),
-            success: function() {
+            success: function(response) {
                 alert("Cadastro realizado com sucesso!");
-                window.location.href = 'login.html';
+                localStorage.setItem('authToken', response.token);
+                window.location.href = 'lembretes.html';
             },
             error: function() {
                 alert("Erro ao cadastrar. Verifique os dados e tente novamente.");
