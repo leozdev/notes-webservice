@@ -101,13 +101,13 @@ $(document).ready(function() {
                     <span class="side-stick"></span>
                     <div class="d-flex align-items-center mb-3">
                         <i class="fa fa-calendar-o mr-2"></i>
-                        <h6 class="note-date font-12 text-muted mb-0">${lembrete.data}</h6>  <!-- Alterado para "lembrete" -->
+                        <h6 class="note-date font-12 text-muted mb-0">${lembrete.data}</h6>
                     </div>
                     <div class="note-content">
-                        <p class="note-inner-content text-muted" data-noteContent="${lembrete.texto}">${lembrete.texto}</p>  <!-- Alterado para "lembrete" -->
+                        <p class="note-inner-content text-muted" data-noteContent="${lembrete.texto}">${lembrete.texto}</p>
                     </div>
                     <div class="d-flex align-items-center">
-                        <span class="mr-1"><i class="fa fa-trash remove-note"></i></span> <!-- Alterado para "lembrete" -->
+                        <span class="mr-1"><i class="fa fa-trash remove-note"></i></span>
                         <span class="ml-auto mr-1"><i class="fa fa-pencil-square-o edit-note"></i></span> 
                     </div>
                 </div>
