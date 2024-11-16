@@ -85,7 +85,6 @@ $(document).ready(function() {
                     const lembreteHtml = criarHtmlLembrete(lembrete);  
                     $("#note-full-container").prepend(lembreteHtml);  
                 });
-                removerLembrete();  
             },
             error: function() {
                 alert('Erro ao carregar os lembretes. Tente novamente.');  
@@ -97,7 +96,7 @@ $(document).ready(function() {
     // Botão de excluir é o remove-lembrete
     function criarHtmlLembrete(lembrete) {  
         return `
-            <div class="col-md-4 single-note-item all-category">
+        <div class="col-md-4 single-note-item all-category" data-id="${lembrete.id}">
                 <div class="card card-body">
                     <span class="side-stick"></span>
                     <div class="d-flex align-items-center mb-3">
@@ -115,14 +114,6 @@ $(document).ready(function() {
             </div>
         `;
     }
-
-    function removerLembrete() {  
-        $(".remove-note").off('click').on('click', function(event) {  
-            event.stopPropagation();
-            $(this).parents('.single-note-item').remove();
-        });
-    }
-
     // Adicionar novo lembrete
     $('#add-notes').on('click', function() {
         $('#addnotesmodal').modal('show');
@@ -156,12 +147,11 @@ $(document).ready(function() {
                 'Content-Type': 'application/json'
             },
             data: JSON.stringify(novoLembrete),  
-            success: function() {
-                const novoLembreteHtml = criarHtmlLembrete(novoLembrete);  
+            success: function(response) {
+                const novoLembreteHtml = criarHtmlLembrete(response);  
                 $("#note-full-container").prepend(novoLembreteHtml);  
                 $('#note-has-description').val('');  
                 $('#addnotesmodal').modal('hide');
-                removerLembrete();  
                 alert("Lembrete adicionado com sucesso!");  
             },
             error: function() {
@@ -169,6 +159,27 @@ $(document).ready(function() {
             }
         });
     }
+
+    //Deletar lembrete
+    $("#note-full-container").on('click','.remove-note',function(event) {
+        event.stopPropagation();
+        const $elemento = $(this).closest('.single-note-item');
+        const idLembrete =$elemento.data('id')
+        $.ajax({
+            url: `https://ifsp.ddns.net/webservices/lembretes/lembrete/${idLembrete}`,
+            type: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            success: function() {
+                alert('Lembrete removido com sucesso.');
+                $elemento.remove();
+            },
+            error: function() {
+                alert('Erro ao excluir lembrete. Tente novamente.');
+            }
+        });
+    });
 
     // Logout
     $('#logoutButton').on('click', function() {
