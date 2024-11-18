@@ -1,59 +1,74 @@
 $(document).ready(function() {
-    const token = localStorage.getItem('authToken');
-    let idLembreteEmEdicao = null; // Inicializa como null
+    let token = localStorage.getItem('authToken');
+    let idLembreteEmEdicao = null;
+    let intervalo;
 
-    // Verifica se o usuário está autenticado
     if (token) {
         carregarLembretes();
-        verificarValidadeToken(token);
+        iniciarTimerSessao();
     } else {
         window.location.href = 'login.html';
     }
 
-    // Função para verificar a validade do token
-    function verificarValidadeToken(token) {
-        setInterval(function() {
-            $.ajax({
-                url: 'https://ifsp.ddns.net/webservices/lembretes/usuario/check',
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                },
-                success: function() {
-                    mostrarPopupContinuar();
-                },
-                error: function() {
-                    tratarTokenInvalido();
-                },
-            });
-        }, 180000);
+    function iniciarTimerSessao() {
+        let tempoRestante = localStorage.getItem('tempoRestante') ? parseInt(localStorage.getItem('tempoRestante')) : 3 * 60;
+        atualizarTimer(tempoRestante);
+
+        intervalo = setInterval(function() {
+            tempoRestante--;
+            atualizarTimer(tempoRestante);
+            localStorage.setItem('tempoRestante', tempoRestante);
+
+            if (tempoRestante === 60) {
+                mostrarPopupContinuar();
+            }
+
+            if (tempoRestante < 0) {
+                clearInterval(intervalo);
+                $('#timer').text('Sessão encerrada');
+                alert('O tempo da sessão acabou!');
+                logout();
+            }
+        }, 1000);
     }
 
-    function tratarTokenInvalido() {
-        alert('Sua sessão expirou ou está inválida. Você será redirecionado para o login.');
-        localStorage.removeItem('authToken');
-        window.location.href = 'login.html';
+    function atualizarTimer(tempoRestante) {
+        const minutos = Math.floor(tempoRestante / 60);
+        const segundos = tempoRestante % 60;
+        $('#timer').text(`${minutos}:${segundos < 10 ? '0' + segundos : segundos}`);
     }
 
-    // Função para mostrar o popup de renovação de token
     function mostrarPopupContinuar() {
-        $('#renewTokenModal').modal('show');
+        $('#renovarTokenModal').modal('show');
     }
 
-    // Ações do popup
-    $('#continueConnectedYes').on('click', function() {
-        renovarToken();
-        $('#renewTokenModal').modal('hide');
+    $('#continuarConectadoSim').on('click', function() {
+        validarTokenErenovar();
+        $('#renovarTokenModal').modal('hide');
     });
 
-    $('#continueConnectedNo').on('click', function() {
-        localStorage.removeItem('authToken');
-        window.location.href = 'login.html';
+    $('#continuarConectadoNao').on('click', function() {
+        logout();
     });
 
-    // Função para renovar o token
+    function validarTokenErenovar() {
+        $.ajax({
+            url: 'https://ifsp.ddns.net/webservices/lembretes/usuario/check',
+            type: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+            },
+            success: function() {
+                renovarToken();
+            },
+            error: function() {
+                alert('Sua sessão expirou ou está inválida. Você será redirecionado para o login.');
+                logout();
+            },
+        });
+    }
+
     function renovarToken() {
-        const token = localStorage.getItem('authToken');
         $.ajax({
             url: 'https://ifsp.ddns.net/webservices/lembretes/usuario/renew',
             type: 'GET',
@@ -63,17 +78,35 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.token) {
                     localStorage.setItem('authToken', response.token);
-                    alert('Sessão renovada com sucesso!');
+                    token = response.token;
+                    localStorage.setItem('tempoRestante', 3 * 60);
+
+                    clearInterval(intervalo);
+                    iniciarTimerSessao();
                 }
             },
             error: function() {
                 alert('Erro ao tentar manter sua sessão ativa. Você será redirecionado para o login.');
-                window.location.href = 'login.html';
+                logout();
             },
         });
     }
 
-    // Funções para trabalhar com os lembretes
+    function logout() {
+        $.ajax({
+            url: 'https://ifsp.ddns.net/webservices/lembretes/usuario/logout',
+            type: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            complete: function() {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('tempoRestante');
+                window.location.href = 'login.html';
+            }
+        });
+    }
+
     function carregarLembretes() {
         $.ajax({
             url: 'https://ifsp.ddns.net/webservices/lembretes/lembrete',
@@ -82,45 +115,39 @@ $(document).ready(function() {
                 Authorization: 'Bearer ' + token,
             },
             success: function(response) {
-                response.forEach( function(lembrete) {
+                response.forEach(function(lembrete) {
                     const lembreteHtml = criarHtmlLembrete(lembrete);
                     $('#note-full-container').prepend(lembreteHtml);
                 });
-            },
-            error: function() {
-                alert('Erro ao carregar os lembretes. Tente novamente.');
-            },
+            }
         });
     }
 
-    // Botão de editar é o edit-lembrete
-    // Botão de excluir é o remove-lembrete
     function criarHtmlLembrete(lembrete) {
         return `
         <div class="col-md-4 single-note-item all-category" data-id="${lembrete.id}">
-                <div class="card card-body">
-                    <span class="side-stick"></span>
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="fa fa-calendar-o mr-2"></i>
-                        <h6 class="note-date font-12 text-muted mb-0">${lembrete.data}</h6>
-                    </div>
-                    <div class="note-content">
-                        <p class="note-inner-content text-muted" data-noteContent="${lembrete.texto}">${lembrete.texto}</p>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <span class="mr-1"><i class="fa fa-trash remove-note"></i></span>
-                        <span class="ml-auto mr-1"><i class="fa fa-pencil-square-o edit-note"></i></span> 
-                    </div>
+            <div class="card card-body">
+                <span class="side-stick"></span>
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fa fa-calendar-o mr-2"></i>
+                    <h6 class="note-date font-12 text-muted mb-0">${lembrete.data}</h6>
+                </div>
+                <div class="note-content">
+                    <p class="note-inner-content text-muted" data-noteContent="${lembrete.texto}">${lembrete.texto}</p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span class="mr-1"><i class="fa fa-trash remove-note"></i></span>
+                    <span class="ml-auto mr-1"><i class="fa fa-pencil-square-o edit-note"></i></span> 
                 </div>
             </div>
+        </div>
         `;
     }
 
-    // Adicionar novo lembrete
     $('#add-notes').on('click', function() {
-        idLembreteEmEdicao = null; // Redefine para novo lembrete
-        $('#note-has-description').val(''); // Limpa o campo de descrição
-        $('#btn-n-add').text('Adicionar'); // Altera texto do botão para "Adicionar"
+        idLembreteEmEdicao = null;
+        $('#note-has-description').val('');
+        $('#btn-n-add').text('Adicionar');
         $('#addnotesmodal').modal('show');
     });
 
@@ -139,7 +166,6 @@ $(document).ready(function() {
         } else {
             const novoLembrete = {
                 texto: descricaoLembrete,
-                data: new Date().toISOString().slice(0, 19).replace('T', ' '),
             };
 
             adicionarNovoLembrete(novoLembrete);
@@ -160,29 +186,31 @@ $(document).ready(function() {
                 $('#note-full-container').prepend(novoLembreteHtml);
                 $('#note-has-description').val('');
                 $('#addnotesmodal').modal('hide');
-                alert('Lembrete adicionado com sucesso!');
             },
-            error: function () {
+            error: function() {
                 alert('Erro ao adicionar o lembrete. Tente novamente.');
             },
         });
     }
 
-    // Editar lembrete
-    $('#note-full-container').on('click', '.edit-note', function (event) {
+    $('#note-full-container').on('click', '.edit-note', function(event) {
         event.stopPropagation();
 
         const $elemento = $(this).closest('.single-note-item');
-        idLembreteEmEdicao = $elemento.data('id'); // Guardar ID do lembrete
+        idLembreteEmEdicao = $elemento.data('id');
         const conteudoAtual = $elemento.find('.note-inner-content').data('notecontent');
 
-        $('#note-has-description').val(conteudoAtual); // Preencher campo com texto atual
-        $('#btn-n-add').text('Salvar'); // Ajustar botão para "Salvar"
+        $('#note-has-description').val(conteudoAtual);
+        $('#btn-n-add').text('Salvar');
         $('#addnotesmodal').modal('show');
     });
 
     function editarLembrete(idLembrete, novoTexto) {
-        const token = localStorage.getItem('authToken');
+        if ($(`#note-full-container .single-note-item[data-id="${idLembrete}"] .note-inner-content`).data('notecontent') === novoTexto) {
+            $('#addnotesmodal').modal('hide');
+            return;
+        }
+
         $.ajax({
             url: `https://ifsp.ddns.net/webservices/lembretes/lembrete/${idLembrete}`,
             type: 'PUT',
@@ -196,11 +224,10 @@ $(document).ready(function() {
                 $elemento.find('.note-inner-content').text(novoTexto);
                 $elemento.find('.note-inner-content').data('notecontent', novoTexto);
 
-                idLembreteEmEdicao = null; // Redefine para novo lembrete
-                $('#note-has-description').val(''); // Limpa o campo de descrição
-                $('#btn-n-add').text('Adicionar'); // Volta o texto para "Adicionar"
+                idLembreteEmEdicao = null;
+                $('#note-has-description').val('');
+                $('#btn-n-add').text('Adicionar');
                 $('#addnotesmodal').modal('hide');
-                alert('Lembrete editado com sucesso.');
             },
             error: function() {
                 alert('Erro ao editar o lembrete. Tente novamente.');
@@ -208,11 +235,10 @@ $(document).ready(function() {
         });
     }
 
-    //Deletar lembrete
-    $("#note-full-container").on('click','.remove-note',function(event) {
+    $('#note-full-container').on('click', '.remove-note', function(event) {
         event.stopPropagation();
         const $elemento = $(this).closest('.single-note-item');
-        const idLembrete =$elemento.data('id')
+        const idLembrete = $elemento.data('id');
         $.ajax({
             url: `https://ifsp.ddns.net/webservices/lembretes/lembrete/${idLembrete}`,
             type: 'DELETE',
@@ -220,7 +246,6 @@ $(document).ready(function() {
                 'Authorization': 'Bearer ' + token
             },
             success: function() {
-                alert('Lembrete removido com sucesso.');
                 $elemento.remove();
             },
             error: function() {
@@ -229,22 +254,7 @@ $(document).ready(function() {
         });
     });
 
-    // Logout
     $('#logoutButton').on('click', function() {
-        const token = localStorage.getItem('authToken');
-        $.ajax({
-            url: 'https://ifsp.ddns.net/webservices/lembretes/usuario/logout',
-            type: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + token
-            },
-            success: function() {
-                localStorage.removeItem('authToken');
-            },
-            complete: function() {
-                window.location.href = 'login.html';
-            }
-        });
+        logout();
     });
-
 });

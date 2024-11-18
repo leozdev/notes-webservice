@@ -16,7 +16,6 @@ $(document).ready(function() {
             contentType: "application/json",
             data: JSON.stringify(data),
             success: function(response) {
-                alert("Cadastro realizado com sucesso!");
                 localStorage.setItem('authToken', response.token);
                 window.location.href = 'lembretes.html';
             },

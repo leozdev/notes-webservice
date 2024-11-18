@@ -11,11 +11,13 @@
 </head>
 <body>
 
-    <header class="container d-flex justify-content-md-between py-4 mb-4 border-bottom">
+    <header class="container d-flex justify-content-between py-4 mb-4 border-bottom align-items-center">
         <img src="assets/logo.png" alt="Logo" height="40">
-
+        <div class="d-flex justify-content-center flex-grow-1">
+            <p class="mb-0">Tempo restante da sessão: <span id="timer">3:00</span></p>
+        </div>
         <div class="text-end">
-        <button id="logoutButton" type="button" class="btn btn-outline-primary me-2">Sair</button>
+            <button id="logoutButton" type="button" class="btn btn-outline-primary me-2">Sair</button>
         </div>
     </header>
 
@@ -41,7 +43,7 @@
     <!-- Modal para adicionar um lembrete -->
     <div class="modal fade" id="addnotesmodal" tabindex="-1" role="dialog" aria-labelledby="addnotesmodalTitle" style="display: none;" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content custom-rounded"> <!-- Adiciona a classe custom-rounded aqui -->
+            <div class="modal-content custom-rounded">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title text-white">Lembrete</h5>
                 </div>
@@ -71,7 +73,7 @@
 
 
     <!-- Modal para perguntar se o usuário deseja continuar conectado -->
-    <div id="renewTokenModal" class="modal" tabindex="-1" role="dialog">
+    <div id="renovarTokenModal" class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -84,8 +86,8 @@
                         <p>Sua sessão está prestes a expirar. Deseja continuar conectado?</p>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id="continueConnectedYes">Sim</button>
-                        <button type="button" class="btn btn-secondary" id="continueConnectedNo">Não</button>
+                        <button type="button" class="btn btn-primary" id="continuarConectadoSim">Sim</button>
+                        <button type="button" class="btn btn-secondary" id="continuarConectadoNao">Não</button>
                 </div>
             </div>
         </div>
