@@ -34,4 +34,10 @@ A aplicação permite aos usuários:
 - `css/`: Estilos utilizados na aplicação.
 - `js/`: Código JavaScript para manipulação de dados e comunicação com o webservice.
 
+## Créditos
+
+Este projeto utiliza o framework **Bootstrap**, disponível sob a licença MIT.
+
+Copyright (c) 2024 Leo Freitas, Vinícius Rafael e Mariana Montilha.
+
 ---
